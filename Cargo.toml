@@ -1,6 +1,9 @@
 [package]
-name = "bubble-shell"
+name = "tinshell"
 version = "0.1.0"
-authors = ["Josh Mcguigan"]
+authors = ["Tinfold"]
 
 [dependencies]
+colored = "2.0.0"
+crossterm = "0.26.1"
+ctrlc = "3.4.0"
