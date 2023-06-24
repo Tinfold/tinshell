@@ -12,6 +12,7 @@ pub fn ls(_args: Shlex) {
     let perms = fs::read_dir(dir);
     match perms {
         Ok(paths) => {
+            print!("{}", "\n\n");
             let mut counter = 0;
             for path in paths {
                 if counter == 7 {
@@ -35,4 +36,5 @@ pub fn ls(_args: Shlex) {
         }
         Err(e) => println!("{}", e),
     }
+    print!("{}", "\n\n");
 }
