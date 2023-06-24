@@ -6,6 +6,9 @@ extern crate shlex;
 use colored::control;
 use colored::Colorize;
 use commands::commands_map;
+//use crossterm::style::Color;
+//use crossterm::style::ResetColor;
+//use crossterm::style::SetBackgroundColor;
 use crossterm::terminal;
 use crossterm::terminal::Clear;
 use crossterm::terminal::SetTitle;
@@ -40,6 +43,13 @@ fn main() -> Result<()> {
     loop {
         // use the `>` character as the prompt
         // need to explicitly flush this to ensure it prints before read_line
+
+        /*
+        execute!(
+            stdout(),
+            SetBackgroundColor(Color::Rgb { r: 6, g: 19, b: 15 }),
+        )?;
+        */
         println!(
             "\n{}",
             String::from(
@@ -51,6 +61,9 @@ fn main() -> Result<()> {
                     + "> "
             )
         );
+
+        //execute!(stdout(), ResetColor,)?;
+
         print!("> ");
         stdout().flush().unwrap();
 
