@@ -1,6 +1,8 @@
 extern crate colored;
 extern crate crossterm;
 extern crate ctrlc;
+extern crate shlex;
+
 use colored::control;
 use colored::Colorize;
 use commands::commands_map;
@@ -8,6 +10,7 @@ use crossterm::terminal;
 use crossterm::terminal::Clear;
 use crossterm::terminal::SetTitle;
 use crossterm::{execute, Result};
+use shlex::Shlex;
 use std::io::{stdin, stdout, Write};
 use std::process::{Child, Command, Stdio};
 use std::sync::mpsc::channel;
@@ -24,9 +27,9 @@ fn main() -> Result<()> {
     execute!(stdout(), Clear(terminal::ClearType::All))?;
 
     let map = commands_map();
-    let files_per_row = 7;
+    //let files_per_row = 7;
     // Only needed for windows
-    let (tx, rx) = channel();
+    let (tx, _rx) = channel();
 
     // This effectively prevents closing the application with CTRL-C
     ctrlc::set_handler(move || tx.send(()).expect("Could not send signal on channel."))
@@ -53,28 +56,31 @@ fn main() -> Result<()> {
 
         let mut input = String::new();
         match stdin().read_line(&mut input) {
-            Ok(v) => {
+            Ok(_v) => {
                 // read_line leaves a trailing newline, which trim removes
                 // this needs to be peekable so we can determine when we are on the last command
+
                 let mut commands = input.trim().split(" | ").peekable();
                 let mut previous_command = None;
 
                 while let Some(command) = commands.next() {
                     // everything after the first whitespace character is interpreted as args to the command
-                    let mut parts = command.trim().split_whitespace();
-                    let command = parts.next().unwrap_or("");
+                    let mut parts = Shlex::new(command); //.trim().split_whitespace();
+                    let temp = parts.next().unwrap_or(" ".to_string());
+                    let command: &str = temp.as_str(); //_or("");
                     let args = parts;
                     // Check for command name in hashmap.
 
                     // if it is a special/reserved command like "exit", match it manually here.
                     match command {
                         "exit" => return Ok(()),
-                        command => {}
+                        _command => {}
                     }
 
-                    if (map.contains_key(command)) {
+                    let res: bool = map.contains_key(command);
+                    if res == true {
                         // If so, run that command with args.
-                        map.get(command).unwrap().command(&args);
+                        map.get(command).unwrap().command(args);
                     } else {
                         let stdin = previous_command.map_or(Stdio::inherit(), |output: Child| {
                             Stdio::from(output.stdout.unwrap())

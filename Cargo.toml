@@ -7,3 +7,4 @@ authors = ["Tinfold"]
 colored = "2.0.0"
 crossterm = "0.26.1"
 ctrlc = "3.4.0"
+shlex = "1.1.0"
