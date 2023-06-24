@@ -54,7 +54,7 @@ fn main() -> Result<()> {
             "\n{}",
             String::from(
                 "[".to_owned()
-                    + ("tinshell".truecolor(48, 153, 117)).to_string().as_str()
+                    + ("tsh".truecolor(48, 153, 117)).to_string().as_str()
                     + "]"
                     + " -> "
                     + get_dir().as_str()
