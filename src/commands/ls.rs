@@ -18,7 +18,7 @@ pub fn ls(_args: Shlex) {
                 if counter == 7 {
                     // need to export this as a variable somewhere
                     counter = 0;
-                    print!("{}", "\n\n");
+                    print!("{}", "\n");
                 }
                 let is_dir = path.as_ref().unwrap().path().is_dir();
                 match path.unwrap().path().file_name() {
@@ -36,5 +36,5 @@ pub fn ls(_args: Shlex) {
         }
         Err(e) => println!("{}", e),
     }
-    print!("{}", "\n\n");
+    print!("{}", "\n");
 }

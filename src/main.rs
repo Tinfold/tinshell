@@ -6,9 +6,6 @@ extern crate shlex;
 use colored::control;
 use colored::Colorize;
 use commands::commands_map;
-//use crossterm::style::Color;
-//use crossterm::style::ResetColor;
-//use crossterm::style::SetBackgroundColor;
 use crossterm::terminal;
 use crossterm::terminal::Clear;
 use crossterm::terminal::SetTitle;
@@ -44,12 +41,6 @@ fn main() -> Result<()> {
         // use the `>` character as the prompt
         // need to explicitly flush this to ensure it prints before read_line
 
-        /*
-        execute!(
-            stdout(),
-            SetBackgroundColor(Color::Rgb { r: 6, g: 19, b: 15 }),
-        )?;
-        */
         println!(
             "\n{}",
             String::from(
@@ -62,8 +53,6 @@ fn main() -> Result<()> {
             )
         );
 
-        //execute!(stdout(), ResetColor,)?;
-
         print!("> ");
         stdout().flush().unwrap();
 
@@ -72,7 +61,6 @@ fn main() -> Result<()> {
             Ok(_v) => {
                 // read_line leaves a trailing newline, which trim removes
                 // this needs to be peekable so we can determine when we are on the last command
-
                 let mut commands = input.trim().split(" | ").peekable();
                 let mut previous_command = None;
 
