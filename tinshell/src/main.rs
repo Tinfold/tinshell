@@ -69,12 +69,45 @@ fn main() -> Result<()> {
                     let temp = parts.next().unwrap_or(" ".to_string());
                     let command: &str = temp.as_str(); //_or("");
                     let args = parts;
-                    // Check for command name in hashmap.
 
                     // if it is a special/reserved command like "exit", match it manually here.
                     match command {
                         "exit" => return Ok(()),
-                        _command => {}
+                        "cd" => {
+                            map.get("cd").unwrap().command(args);
+                        }
+                        _command => {
+                            let stdin = previous_command
+                                .map_or(Stdio::inherit(), |output: Child| {
+                                    Stdio::from(output.stdout.unwrap())
+                                });
+
+                            let stdout = if commands.peek().is_some() {
+                                // there is another command piped behind this one
+                                // prepare to send output to the next command
+                                Stdio::piped()
+                            } else {
+                                // there are no more commands piped behind this one
+                                // send output to shell stdout
+                                Stdio::inherit()
+                            };
+
+                            let output = Command::new(command)
+                                .args(args)
+                                .stdin(stdin)
+                                .stdout(stdout)
+                                .spawn();
+
+                            match output {
+                                Ok(output) => {
+                                    previous_command = Some(output);
+                                }
+                                Err(e) => {
+                                    previous_command = None;
+                                    eprintln!("{}", e);
+                                }
+                            };
+                        }
                     }
 
                     /*
@@ -87,37 +120,6 @@ fn main() -> Result<()> {
                         map.get(command).unwrap().command(args);
                     }
                     */
-                    let stdin = previous_command.map_or(Stdio::inherit(), |output: Child| {
-                        Stdio::from(output.stdout.unwrap())
-                    });
-
-                    let stdout = if commands.peek().is_some() {
-                        // there is another command piped behind this one
-                        // prepare to send output to the next command
-                        println!("{}", "PIPED!");
-                        Stdio::piped()
-                    } else {
-                        // there are no more commands piped behind this one
-                        // send output to shell stdout
-                        println!("{}", "NOT PIPED LOL!");
-                        Stdio::inherit()
-                    };
-
-                    let output = Command::new(command)
-                        .args(args)
-                        .stdin(stdin)
-                        .stdout(stdout)
-                        .spawn();
-
-                    match output {
-                        Ok(output) => {
-                            previous_command = Some(output);
-                        }
-                        Err(e) => {
-                            previous_command = None;
-                            eprintln!("{}", e);
-                        }
-                    };
                 }
 
                 if let Some(mut final_command) = previous_command {

@@ -18,7 +18,7 @@ impl CustomColor {
     }
 }
 
-pub fn ls() {
+fn ls() {
     let mut color_map = HashMap::new();
     color_map.insert("exe", CustomColor::new(48, 153, 117));
     // Check if we have permission to read the directory

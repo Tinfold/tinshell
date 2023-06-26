@@ -1,4 +1,4 @@
 [workspace]
 
-members=["tinshell","shared","commands/ls",]
+members=["tinshell","shared","commands/ls","commands/cd","commands/mf","commands/md", "commands/del", "commands/mv"]
 
