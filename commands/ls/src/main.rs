@@ -41,7 +41,7 @@ fn ls() {
                     None => println!("{}", "INVALID_DIR"),
                     Some(obj) => {
                         if is_dir == true {
-                            print!("{}\t", obj.to_str().unwrap().truecolor(69, 77, 102))
+                            print!("{}\t", obj.to_str().unwrap().truecolor(118, 129, 162))
                         } else {
                             let name = obj.to_str().unwrap();
                             let ext = pth.extension().unwrap_or(OsStr::new(""));
