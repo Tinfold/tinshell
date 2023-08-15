@@ -6,10 +6,6 @@
 
 This is my own custom shell, built in Rust.
 
-
-It is recommended that you install Rust on your system so that you can have cargo (Rust's package manager).
-
-
 Recommended programs:
 
 Ripgrep (rg) (cargo install ripgrep)
