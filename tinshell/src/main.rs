@@ -1,6 +1,7 @@
 extern crate colored;
 extern crate crossterm;
 extern crate shlex;
+extern crate reedline;
 use colored::control;
 use colored::Colorize;
 use commands::commands_map;
@@ -8,7 +9,9 @@ use crossterm::terminal;
 use crossterm::terminal::Clear;
 use crossterm::terminal::SetTitle;
 use crossterm::{execute, Result};
+use reedline::DefaultPromptSegment;
 use shlex::Shlex;
+use reedline::{DefaultPrompt, Reedline, Signal};
 
 use std::io::{stdin, stdout, Write};
 use std::process::{Child, Command, Stdio};
@@ -20,7 +23,19 @@ extern crate shared;
 use shared::get_dir;
 use shared::set_dir;
 
+
+
+
+
 fn main() -> Result<()> {
+    
+    let mut line_editor = Reedline::create();
+    
+    // Eventually need to replace the crappy unicode > character for the prompt. For now, this will do.
+    let left_prompt = DefaultPromptSegment::Empty;
+    let right_prompt = DefaultPromptSegment::Empty;
+    let prompt = DefaultPrompt::new(left_prompt,right_prompt);
+    
     let _ = control::set_virtual_terminal(true);
     execute!(stdout(), SetTitle("tinshell"))?;
     execute!(stdout(), Clear(terminal::ClearType::All))?;
@@ -52,15 +67,17 @@ fn main() -> Result<()> {
             )
         );
 
-        print!("> ");
+        //print!("> ");
         stdout().flush().unwrap();
 
-        let mut input = String::new();
-        match stdin().read_line(&mut input) {
-            Ok(_v) => {
+        //let mut input = String::new();
+        
+        //match stdin().read_line(&mut input) {
+        match line_editor.read_line(&prompt) {
+            Ok(Signal::Success(buffer)) => {
                 // read_line leaves a trailing newline, which trim removes
                 // this needs to be peekable so we can determine when we are on the last command
-                let mut commands = input.trim().split(" | ").peekable();
+                let mut commands = buffer.trim().split(" | ").peekable();
                 let mut previous_command = None;
 
                 while let Some(command) = commands.next() {
@@ -126,10 +143,20 @@ fn main() -> Result<()> {
                     // block until the final command has finished
                     final_command.wait().unwrap();
                 }
+                
             }
+            
+            Ok(Signal::CtrlD) | Ok(Signal::CtrlC) => {
+                println!("\nAborted!");
+            }
+
+            
             Err(e) => {
                 println!("{}", e)
             }
+            
+            
+            
         }
     }
 }

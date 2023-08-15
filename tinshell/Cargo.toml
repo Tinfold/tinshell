@@ -10,3 +10,4 @@ ctrlc = "3.4.0"
 path-slash = "0.2.1"
 shlex = "1.1.0"
 shared = {path="../shared"}
+reedline = "0.22.0"
