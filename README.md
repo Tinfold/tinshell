@@ -11,9 +11,12 @@ It is recommended that you install Rust on your system so that you can have carg
 
 
 Recommended programs:
+
 Ripgrep (rg) (cargo install ripgrep)
+
 Ox (ox) (cargo install --git https://github.com/curlpipe/ox) // This is a text editor for LINUX
-Helix (winget install Helix.Helix) // Thi sis a text editor for WINDOWS
+
+Helix (winget install Helix.Helix) // This is a text editor for WINDOWS
 
 
 
