@@ -2,6 +2,8 @@ extern crate colored;
 extern crate crossterm;
 extern crate shlex;
 extern crate reedline;
+extern crate nu_ansi_term;
+
 use colored::control;
 use colored::Colorize;
 use commands::commands_map;
@@ -9,9 +11,9 @@ use crossterm::terminal;
 use crossterm::terminal::Clear;
 use crossterm::terminal::SetTitle;
 use crossterm::{execute, Result};
-use reedline::DefaultPromptSegment;
 use shlex::Shlex;
-use reedline::{DefaultPrompt, Reedline, Signal};
+use reedline::{DefaultPrompt, DefaultValidator, Reedline, Signal, DefaultHinter, DefaultPromptSegment, DefaultCompleter};
+use nu_ansi_term::{Color, Style};
 
 use std::io::{stdin, stdout, Write};
 use std::process::{Child, Command, Stdio};
@@ -23,22 +25,24 @@ extern crate shared;
 use shared::get_dir;
 use shared::set_dir;
 
-
-
-
-
 fn main() -> Result<()> {
     
-    let mut line_editor = Reedline::create();
+    //let completer = Box::new(DefaultCompleter::new(external_commands));
+    let validator = Box::new(DefaultValidator);
+    
+    let mut line_editor = Reedline::create().with_validator(validator).with_hinter(Box::new(
+  DefaultHinter::default()
+  .with_style(Style::new().italic().fg(Color::LightGray)),
+));
     
     // Eventually need to replace the crappy unicode > character for the prompt. For now, this will do.
+
     let left_prompt = DefaultPromptSegment::Empty;
     let right_prompt = DefaultPromptSegment::Empty;
     let prompt = DefaultPrompt::new(left_prompt,right_prompt);
     
-    let _ = control::set_virtual_terminal(true);
     execute!(stdout(), SetTitle("tinshell"))?;
-    execute!(stdout(), Clear(terminal::ClearType::All))?;
+    //execute!(stdout(), Clear(terminal::ClearType::All))?;
 
     let map = commands_map();
     //let files_per_row = 7;
@@ -52,9 +56,13 @@ fn main() -> Result<()> {
     // Set dir to whatever environment's dir is
     set_dir(&get_dir());
     loop {
+
+        // This has to be spammed in the windows terminal to prevent ansi escape codes from breaking
+        let _ = control::set_virtual_terminal(true);
         // use the `>` character as the prompt
         // need to explicitly flush this to ensure it prints before read_line
 
+        
         println!(
             "\n{}",
             String::from(
@@ -66,6 +74,7 @@ fn main() -> Result<()> {
                     + "> "
             )
         );
+        
 
         //print!("> ");
         stdout().flush().unwrap();
@@ -150,9 +159,8 @@ fn main() -> Result<()> {
                 println!("\nAborted!");
             }
 
-            
             Err(e) => {
-                println!("{}", e)
+                println!("Error: {}", e)
             }
             
             

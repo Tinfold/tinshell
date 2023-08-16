@@ -595,6 +595,7 @@ dependencies = [
  "colored",
  "crossterm",
  "ctrlc",
+ "nu-ansi-term",
  "path-slash",
  "reedline",
  "shared",
