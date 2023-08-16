@@ -1,51 +1,51 @@
 extern crate colored;
 extern crate crossterm;
-extern crate shlex;
-extern crate reedline;
 extern crate nu_ansi_term;
+extern crate reedline;
+extern crate shared;
+extern crate shlex;
 
 use colored::control;
 use colored::Colorize;
 use commands::commands_map;
-use crossterm::terminal;
-use crossterm::terminal::Clear;
+
 use crossterm::terminal::SetTitle;
 use crossterm::{execute, Result};
-use shlex::Shlex;
-use reedline::{DefaultPrompt, DefaultValidator, Reedline, Signal, DefaultHinter, DefaultPromptSegment, DefaultCompleter};
 use nu_ansi_term::{Color, Style};
+use reedline::{
+    DefaultHinter, DefaultPrompt, DefaultPromptSegment, DefaultValidator, Reedline, Signal,
+};
+use shlex::Shlex;
 
-use std::io::{stdin, stdout, Write};
+use shared::get_dir;
+use shared::set_dir;
+use std::io::{stdout, Write};
 use std::process::{Child, Command, Stdio};
 use std::sync::mpsc::channel;
 
 mod commands;
 
-extern crate shared;
-use shared::get_dir;
-use shared::set_dir;
-
 fn main() -> Result<()> {
-    
     //let completer = Box::new(DefaultCompleter::new(external_commands));
     let validator = Box::new(DefaultValidator);
-    
-    let mut line_editor = Reedline::create().with_validator(validator).with_hinter(Box::new(
-  DefaultHinter::default()
-  .with_style(Style::new().italic().fg(Color::LightGray)),
-));
-    
+
+    let mut line_editor = Reedline::create()
+        .with_validator(validator)
+        .with_hinter(Box::new(
+            DefaultHinter::default().with_style(Style::new().italic().fg(Color::LightGray)),
+        ));
+
     // Eventually need to replace the crappy unicode > character for the prompt. For now, this will do.
 
     let left_prompt = DefaultPromptSegment::Empty;
     let right_prompt = DefaultPromptSegment::Empty;
-    let prompt = DefaultPrompt::new(left_prompt,right_prompt);
-    
+    let prompt = DefaultPrompt::new(left_prompt, right_prompt);
+
     execute!(stdout(), SetTitle("tinshell"))?;
     //execute!(stdout(), Clear(terminal::ClearType::All))?;
 
     let map = commands_map();
-    //let files_per_row = 7;
+
     // Only needed for windows
     let (tx, _rx) = channel();
 
@@ -55,14 +55,11 @@ fn main() -> Result<()> {
 
     // Set dir to whatever environment's dir is
     set_dir(&get_dir());
-    loop {
 
+    loop {
         // This has to be spammed in the windows terminal to prevent ansi escape codes from breaking
         let _ = control::set_virtual_terminal(true);
-        // use the `>` character as the prompt
-        // need to explicitly flush this to ensure it prints before read_line
 
-        
         println!(
             "\n{}",
             String::from(
@@ -74,14 +71,12 @@ fn main() -> Result<()> {
                     + "> "
             )
         );
-        
 
+        // use the `>` character as the prompt
+        // need to explicitly flush this to ensure it prints before read_line
         //print!("> ");
         stdout().flush().unwrap();
 
-        //let mut input = String::new();
-        
-        //match stdin().read_line(&mut input) {
         match line_editor.read_line(&prompt) {
             Ok(Signal::Success(buffer)) => {
                 // read_line leaves a trailing newline, which trim removes
@@ -152,9 +147,8 @@ fn main() -> Result<()> {
                     // block until the final command has finished
                     final_command.wait().unwrap();
                 }
-                
             }
-            
+
             Ok(Signal::CtrlD) | Ok(Signal::CtrlC) => {
                 println!("\nAborted!");
             }
@@ -162,9 +156,6 @@ fn main() -> Result<()> {
             Err(e) => {
                 println!("Error: {}", e)
             }
-            
-            
-            
         }
     }
 }
